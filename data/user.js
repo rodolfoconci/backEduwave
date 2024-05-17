@@ -19,18 +19,19 @@ export async function addUser(user) {
 export async function findByCredential(email, password) {
   const clientmongo = await getConnection();
 
-  const user = clientmongo
+  const user = await clientmongo
     .db("sample_tp2")
     .collection("users")
     .findOne({ email: email });
+
   if (!user) {
-    throw new Error("El usuario no existe");
+    throw new Error("Credenciales no validas");
   }
 
   const isMatch = await bcryptjs.compare(password, user.password);
 
   if (!isMatch) {
-    throw new Error("Password no valido");
+    throw new Error("Credenciales no validas");
   }
 
   return user;
