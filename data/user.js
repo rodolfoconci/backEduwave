@@ -5,22 +5,35 @@ import jwt from "jsonwebtoken";
 export async function addUser(user) {
   const clientmongo = await getConnection();
 
-  // TODO Validar si el usuario existe
+  if(userExist(user.mail)){
+    throw new Error("Usuario existe");
+  }
   user.password = await bcryptjs.hash(user.password, 10);
 
   const result = clientmongo
-    .db("sample_tp2")
+    .db()
     .collection("users")
     .insertOne(user);
 
   return result;
+  
+}
+
+async function userExist(username) {
+  const clientmongo = await getConnection();
+  const user = await clientmongo
+    .db()
+    .collection("users")
+    .findOne({ username: username });
+
+  return user !== null;
 }
 
 export async function findByCredential(email, password) {
   const clientmongo = await getConnection();
 
   const user = await clientmongo
-    .db("sample_tp2")
+    .db()
     .collection("users")
     .findOne({ email: email });
 
@@ -45,3 +58,34 @@ export async function generateAuthToken(user) {
   );
   return token;
 }
+
+export async function getUser(id) {
+  const clientmongo = await getConnection();
+
+  const user = await clientmongo
+    .db()
+    .collection("user")
+    .findOne({ _id: new ObjectId(id) });
+
+  return user;
+}
+
+export async function updateUser(user) {
+  const clientmongo = await getConnection();
+  const query = { _id: new ObjectId(user._id) };
+  const newValues = {
+    $set: {
+      mail: user.mail,
+      nombre: user.nombre,
+      apellido: user.apellido,
+      dni: user.dni
+    },
+  };
+
+  const result = await clientmongo
+    .db()
+    .collection("user")
+    .updateOne(query, newValues);
+  return result;
+}
+
