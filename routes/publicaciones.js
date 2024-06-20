@@ -14,14 +14,18 @@ import auth from "../middleware/auth.js";
 
 const router = express.Router();
 
-router.get("/", auth, async (req, res) => {
+/* router.get("/", async (req, res) => {
   const publicacion = await getPublicaciones();
   res.json(publicacion);
-});
+}); */
 
-router.get("/:id", auth, async (req, res) => {
-  const publicacion = await getPublicacion(req.params.id);
-  res.json(publicacion);
+router.get("/validas", async (req, res) => {
+  try {
+    const publicaciones = await getPublicacionesValidas();
+    res.json(publicaciones);
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
 });
 
 router.post("/publicar", auth, async (req, res) => {
@@ -36,13 +40,15 @@ router.get("/byMateria", auth, async (req, res) => {
   res.json(publicaciones);
 });
 
-router.get("/validas", auth, async (req, res) => {
-  const publicaciones = await getPublicacionesValidas();
-  res.json(publicaciones);
-});
+
 
 router.get("/noValidas", auth, async (req, res) => {
   const publicacion = await getPublicacionesNoValidas();
+  res.json(publicacion);
+});
+
+router.get("/:id", auth, async (req, res) => {
+  const publicacion = await getPublicacion(req.params.id);
   res.json(publicacion);
 });
 

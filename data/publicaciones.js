@@ -5,7 +5,7 @@ export async function getPublicaciones() {
   const clientmongo = await getConnection();
 
   const publicaciones = await clientmongo
-    .db()
+    .db("eduwave")
     .collection("publicaciones")
     .find()
     .toArray();
@@ -26,9 +26,9 @@ export async function getPublicacionesValidas() {
   const clientmongo = await getConnection();
 
   const publicaciones = await clientmongo
-    .db()
+    .db("eduwave")
     .collection("publicaciones")
-    .find({ validado: true })
+    .find({ validate: true })
     .toArray();
   return publicaciones;
 }

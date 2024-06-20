@@ -2,38 +2,36 @@ import getConnection from "./connection.js";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+const DATABASE = 'eduwave';
+
 export async function addUser(user) {
   const clientmongo = await getConnection();
+  const userExists = await clientmongo
+    .db("eduwave")
+    .collection("users")
+    .findOne({ email: user.email });
 
-  if(userExist(user.mail)){
-    throw new Error("Usuario existe");
+  if (!userExists) {
+    user.password = await bcryptjs.hash(user.password, 10);
+    user.role = "profesor";
+
+    const result = await clientmongo
+      .db("eduwave")
+      .collection("users")
+      .insertOne(user);
+
+    return result;
+  } else {
+    throw new Error("Usuario ya existe");
   }
-  user.password = await bcryptjs.hash(user.password, 10);
-
-  const result = clientmongo
-    .db()
-    .collection("users")
-    .insertOne(user);
-
-  return result;
-  
 }
 
-async function userExist(username) {
-  const clientmongo = await getConnection();
-  const user = await clientmongo
-    .db()
-    .collection("users")
-    .findOne({ username: username });
-
-  return user !== null;
-}
 
 export async function findByCredential(email, password) {
   const clientmongo = await getConnection();
 
   const user = await clientmongo
-    .db()
+    .db(DATABASE)
     .collection("users")
     .findOne({ email: email });
 
@@ -63,8 +61,8 @@ export async function getUser(id) {
   const clientmongo = await getConnection();
 
   const user = await clientmongo
-    .db()
-    .collection("user")
+    .db(DATABASE)
+    .collection("users")
     .findOne({ _id: new ObjectId(id) });
 
   return user;
@@ -83,8 +81,8 @@ export async function updateUser(user) {
   };
 
   const result = await clientmongo
-    .db()
-    .collection("user")
+    .db(DATABASE)
+    .collection("users")
     .updateOne(query, newValues);
   return result;
 }
