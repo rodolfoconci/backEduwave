@@ -93,8 +93,10 @@ export async function getPublicacion(id) {
 export async function addPublicacion(publicacion) {
   const clientmongo = await getConnection();
 
+  publicacion.validate = false;
+  publicacion.user_id = new ObjectId(publicacion.user_id);
   const result = await clientmongo
-    .db()
+    .db("eduwave")
     .collection("publicaciones")
     .insertOne(publicacion);
 
