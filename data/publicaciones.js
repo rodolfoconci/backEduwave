@@ -121,15 +121,17 @@ export async function updatePublicacion(publicacion) {
   const query = { _id: new ObjectId(publicacion._id) };
   const newValues = {
     $set: {
-      descripcion: publicacion.descripcion,
+      description: publicacion.description,
       materias: publicacion.materias,
-      user: publicacion.user,
-      precio: publicacion.precio
+      precio: publicacion.precio,
+      telefono: publicacion.telefono,
+      validate: false,
+      edited: true
     },
   };
 
   const result = await clientmongo
-    .db()
+    .db("eduwave")
     .collection("publicaciones")
     .updateOne(query, newValues);
   return result;

@@ -61,7 +61,13 @@ router.get("/byUser/:user_id", async (req, res) => {
   const userId = req.params.user_id;
   try {
     const publicaciones = await getPublicacionesByUserId(userId);
+   /*  if(!publicaciones){
+      publicaciones.tiene = false;
+    } else {
+      publicaciones.tiene = true;
+    } */
     res.json(publicaciones);
+    
   } catch (error) {
     res.status(500).send(error.message);
   }
