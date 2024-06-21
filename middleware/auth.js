@@ -5,7 +5,6 @@ async function auth(req, res, next) {
   const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) return res.sendStatus(401);
-  console.log(token);
 
   jwt.verify(token, process.env.CLAVE_SECRETA, (err, user) => {
       if (err) return res.sendStatus(403);
