@@ -7,7 +7,8 @@ import {
   updatePublicacion,
   getPublicacionesValidas,
   getPublicacionesNoValidas,
-  getPublicacionByMateria
+  getPublicacionByMateria,
+  getPublicacionesByUserId
 } from "../data/publicaciones.js";
 import auth from "../middleware/auth.js";
 
@@ -50,6 +51,17 @@ router.get("/noValidas", auth, async (req, res) => {
 router.get("/:id", auth, async (req, res) => {
   const publicacion = await getPublicacion(req.params.id);
   res.json(publicacion);
+});
+
+
+router.get("/byUser/:user_id", async (req, res) => {
+  const userId = req.params.user_id;
+  try {
+    const publicaciones = await getPublicacionesByUserId(userId);
+    res.json(publicaciones);
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
 });
 
 router.delete("/:id/delete", auth, async (req, res) => {

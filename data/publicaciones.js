@@ -70,9 +70,18 @@ export async function getPublicacionesNoValidas() {
   return publicaciones;
 }
 
-export async function getPublicacion(id) {
+export async function getPublicacionesByUserId(user_id) {
   const clientmongo = await getConnection();
 
+  const publicaciones = await clientmongo
+    .db("eduwave")
+    .collection("publicaciones")
+    .findOne({ user_id: new ObjectId(user_id) });
+  return publicaciones;
+}
+
+export async function getPublicacion(id) {
+  const clientmongo = await getConnection();
   const publicacion = await clientmongo
     .db()
     .collection("publicaciones")
