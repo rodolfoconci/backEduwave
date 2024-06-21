@@ -24,12 +24,14 @@ router.get("/validas", async (req, res) => {
   try {
     const pageSize = req.query.pageSize ? parseInt(req.query.pageSize) : 10; // Default pageSize to 10 if not provided
     const page = req.query.page ? parseInt(req.query.page) : 1; // Default page to 1 if not provided
-    const { publicaciones, total } = await getPublicacionesValidas(pageSize, page);
+    const materia = req.query.materia || null; // Parámetro opcional de materia
+    const { publicaciones, total } = await getPublicacionesValidas(pageSize, page, materia);
     res.json({ publicaciones, total });
   } catch (error) {
     res.status(500).send(error.message);
   }
 });
+
 
 
 router.post("/publicar", auth, async (req, res) => {

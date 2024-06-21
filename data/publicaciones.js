@@ -22,55 +22,72 @@ export async function getPublicacionByMateria(materia){
   return publicaciones;
 }
 
-export async function getPublicacionesValidas(pageSize, page) {
+export async function getPublicacionesValidas(pageSize, page, materia) {
   const clientmongo = await getConnection();
 
   const skip = (page - 1) * pageSize;
 
+  // Construye el pipeline de agregación dinámicamente
+  const pipeline = [
+    {
+      $match: { validate: true }
+    },
+    {
+      $lookup: {
+        from: "users", // La colección de usuarios
+        localField: "user_id", // Campo en publicaciones
+        foreignField: "_id", // Campo en usuarios
+        as: "user_info" // Nombre del campo para la información combinada
+      }
+    },
+    {
+      $unwind: "$user_info" // Desenrolla el array resultante de la combinación
+    },
+    {
+      $project: {
+        _id: 1,
+        description: 1,
+        username: "$user_info.username", // Cambia según el nombre del campo en tu colección de usuarios
+        materias: 1,
+        precio: 1,
+        telefono: 1,
+      }
+    },
+    {
+      $skip: skip
+    },
+    {
+      $limit: pageSize
+    }
+  ];
+
+  // Agrega una etapa de $match adicional si se proporciona una materia
+  if (materia) {
+    pipeline.unshift({
+      $match: { materias: materia }
+    });
+  }
+
   const publicaciones = await clientmongo
     .db("eduwave")
     .collection("publicaciones")
-    .aggregate([
-      {
-        $match: { validate: true }
-      },
-      {
-        $lookup: {
-          from: "users", // La colección de usuarios
-          localField: "user_id", // Campo en publicaciones
-          foreignField: "_id", // Campo en usuarios
-          as: "user_info" // Nombre del campo para la información combinada
-        }
-      },
-      {
-        $unwind: "$user_info" // Desenrolla el array resultante de la combinación
-      },
-      {
-        $project: {
-          _id: 1,
-          description: 1,
-          username: "$user_info.username", // Cambia según el nombre del campo en tu colección de usuarios
-          materias: 1,
-          precio: 1,
-          telefono: 1,
-        }
-      },
-      {
-        $skip: skip
-      },
-      {
-        $limit: pageSize
-      }
-    ])
+    .aggregate(pipeline)
     .toArray();
+
+  // Ajusta la cuenta total para tener en cuenta el filtro de materia
+  const totalMatch = { validate: true };
+  if (materia) {
+    totalMatch.materias = materia;
+  }
 
   const total = await clientmongo
     .db("eduwave")
     .collection("publicaciones")
-    .countDocuments({ validate: true });
+    .countDocuments(totalMatch);
 
   return { publicaciones, total };
 }
+
 
 export async function getPublicacionesNoValidas() {
   const clientmongo = await getConnection();
