@@ -8,7 +8,7 @@ import {
   getPublicacionesValidas,
   getPublicacionesNoValidas,
   getPublicacionByMateria,
-  getPublicacionesByUserId,
+  getPublicacionByUserId,
   validarPublicacion,
   rechazarPublicacion
 } from "../data/publicaciones.js";
@@ -16,11 +16,6 @@ import auth from "../middleware/auth.js";
 
 
 const router = express.Router();
-
-/* router.get("/", async (req, res) => {
-  const publicacion = await getPublicaciones();
-  res.json(publicacion);
-}); */
 
 router.get("/validas", async (req, res) => {
   try {
@@ -33,8 +28,6 @@ router.get("/validas", async (req, res) => {
     res.status(500).send(error.message);
   }
 });
-
-
 
 router.post("/publicar", auth, async (req, res) => {
   const publicacion = req.body;
@@ -80,7 +73,7 @@ router.put("/rechazar/:id", auth, async (req, res) => {
 router.get("/byUser/:user_id", async (req, res) => {
   const userId = req.params.user_id;
   try {
-    const publicaciones = await getPublicacionesByUserId(userId);
+    const publicaciones = await getPublicacionByUserId(userId);
     res.json(publicaciones);
     
   } catch (error) {
@@ -93,11 +86,9 @@ router.delete("/delete/:id", auth, async (req, res) => {
   res.json(publicacion);
 });
 
-router.put("/:id/update", auth, async (req, res) => {
+router.put("/update/:id", auth, async (req, res) => {
   const publicacion = await updatePublicacion(req.body);
   res.json(publicacion);
 });
-// router.put
-// router.delete
 
 export default router;
