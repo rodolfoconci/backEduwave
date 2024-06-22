@@ -134,7 +134,12 @@ export async function getPublicacionesNoValidas(pageSize, page) {
 
   const pipeline = [
     {
-      $match: { validate: false }
+      $match: {
+        $or: [
+          { validate: false },
+          { edited: true }
+        ]
+      }
     },
     {
       $lookup: {
@@ -164,14 +169,19 @@ export async function getPublicacionesNoValidas(pageSize, page) {
       $limit: pageSize
     }
   ];
+
   const publicaciones = await clientmongo
     .db("eduwave")
     .collection("publicaciones")
     .aggregate(pipeline)
     .toArray();
 
-  const totalMatch = { validate: false };
-
+  const totalMatch = {
+    $or: [
+      { validate: false },
+      { edited: true }
+    ]
+  };
 
   const total = await clientmongo
     .db("eduwave")
