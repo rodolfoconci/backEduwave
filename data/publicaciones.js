@@ -242,7 +242,7 @@ export async function deletePublicacion(id) {
   const clientmongo = await getConnection();
 
   const result = await clientmongo
-    .db()
+    .db("eduwave")
     .collection("publicaciones")
     .deleteOne({ _id: new ObjectId(id) });
   return result;
