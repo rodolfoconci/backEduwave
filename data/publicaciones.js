@@ -1,12 +1,15 @@
 import { ObjectId } from "mongodb";
 import getConnection from "./connection.js";
 
+const DATABASE = process.env.DATABASE;
+const COLLECTION = process.env.PUBLICACIONES_COLLECTION;
+
 export async function getPublicaciones() {
   const clientmongo = await getConnection();
 
   const publicaciones = await clientmongo
-    .db("eduwave")
-    .collection("publicaciones")
+    .db(DATABASE)
+    .collection(COLLECTION)
     .find()
     .toArray();
   return publicaciones;
@@ -26,8 +29,8 @@ export async function validarPublicacion(id) {
   };
 
   const result = await clientmongo
-    .db("eduwave")
-    .collection("publicaciones")
+    .db(DATABASE)
+    .collection(COLLECTION)
     .updateOne(query, newValues);
   return result;
 }
@@ -46,8 +49,8 @@ export async function rechazarPublicacion(id) {
   };
 
   const result = await clientmongo
-    .db("eduwave")
-    .collection("publicaciones")
+    .db(DATABASE)
+    .collection(COLLECTION)
     .updateOne(query, newValues);
   return result;
 }
@@ -55,8 +58,8 @@ export async function rechazarPublicacion(id) {
 export async function getPublicacionByMateria(materia){
   const connectiondb = await getConnection();
   const publicaciones = await connectiondb
-    .db()
-    .collection("publicaciones")
+    .db(DATABASE)
+    .collection(COLLECTION)
     .find({ "materia": materia})
     .toArray();
   return publicaciones;
@@ -107,8 +110,8 @@ export async function getPublicacionesValidas(pageSize, page, materia) {
   }
 
   const publicaciones = await clientmongo
-    .db("eduwave")
-    .collection("publicaciones")
+    .db(DATABASE)
+    .collection(COLLECTION)
     .aggregate(pipeline)
     .toArray();
 
@@ -119,8 +122,8 @@ export async function getPublicacionesValidas(pageSize, page, materia) {
   }
 
   const total = await clientmongo
-    .db("eduwave")
-    .collection("publicaciones")
+    .db(DATABASE)
+    .collection(COLLECTION)
     .countDocuments(totalMatch);
 
   return { publicaciones, total };
@@ -171,8 +174,8 @@ export async function getPublicacionesNoValidas(pageSize, page) {
   ];
 
   const publicaciones = await clientmongo
-    .db("eduwave")
-    .collection("publicaciones")
+    .db(DATABASE)
+    .collection(COLLECTION)
     .aggregate(pipeline)
     .toArray();
 
@@ -184,28 +187,28 @@ export async function getPublicacionesNoValidas(pageSize, page) {
   };
 
   const total = await clientmongo
-    .db("eduwave")
-    .collection("publicaciones")
+    .db(DATABASE)
+    .collection(COLLECTION)
     .countDocuments(totalMatch);
 
   return { publicaciones, total };
 }
 
-export async function getPublicacionesByUserId(user_id) {
+export async function getPublicacionByUserId(user_id) {
   const clientmongo = await getConnection();
 
-  const publicaciones = await clientmongo
-    .db("eduwave")
-    .collection("publicaciones")
+  const publicacion = await clientmongo
+    .db(DATABASE)
+    .collection(COLLECTION)
     .findOne({ user_id: new ObjectId(user_id) });
-  return publicaciones;
+  return publicacion;
 }
 
 export async function getPublicacion(id) {
   const clientmongo = await getConnection();
   const publicacion = await clientmongo
-    .db()
-    .collection("publicaciones")
+    .db(DATABASE)
+    .collection(COLLECTION)
     .findOne({ _id: new ObjectId(id) });
 
   return publicacion;
@@ -217,8 +220,8 @@ export async function addPublicacion(publicacion) {
   publicacion.validate = false;
   publicacion.user_id = new ObjectId(publicacion.user_id);
   const result = await clientmongo
-    .db("eduwave")
-    .collection("publicaciones")
+    .db(DATABASE)
+    .collection(COLLECTION)
     .insertOne(publicacion);
 
   return result;
@@ -242,8 +245,8 @@ export async function updatePublicacion(publicacion) {
   };
 
   const result = await clientmongo
-    .db("eduwave")
-    .collection("publicaciones")
+    .db(DATABASE)
+    .collection(COLLECTION)
     .updateOne(query, newValues);
   return result;
 }
@@ -252,8 +255,8 @@ export async function deletePublicacion(id) {
   const clientmongo = await getConnection();
 
   const result = await clientmongo
-    .db()
-    .collection("publicaciones")
+    .db(DATABASE)
+    .collection(COLLECTION)
     .deleteOne({ _id: new ObjectId(id) });
   return result;
 }

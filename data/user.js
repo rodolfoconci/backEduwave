@@ -2,13 +2,14 @@ import getConnection from "./connection.js";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-const DATABASE = 'eduwave';
+const DATABASE = process.env.DATABASE;
+const COLECCTION = process.env.USERS_COLECCTION;
 
 export async function addUser(user) {
   const clientmongo = await getConnection();
   const userExists = await clientmongo
-    .db("eduwave")
-    .collection("users")
+    .db(DATABASE)
+    .collection(COLECCTION)
     .findOne({ email: user.email });
 
   if (!userExists) {
@@ -16,8 +17,8 @@ export async function addUser(user) {
     user.role = "profesor";
 
     const result = await clientmongo
-      .db("eduwave")
-      .collection("users")
+      .db(DATABASE)
+      .collection(COLECCTION)
       .insertOne(user);
 
     return result;
@@ -32,7 +33,7 @@ export async function findByCredential(email, password) {
 
   const user = await clientmongo
     .db(DATABASE)
-    .collection("users")
+    .collection(COLECCTION)
     .findOne({ email: email });
 
   if (!user) {
@@ -62,7 +63,7 @@ export async function getUser(id) {
 
   const user = await clientmongo
     .db(DATABASE)
-    .collection("users")
+    .collection(COLECCTION)
     .findOne({ _id: new ObjectId(id) });
 
   return user;
@@ -82,7 +83,7 @@ export async function updateUser(user) {
 
   const result = await clientmongo
     .db(DATABASE)
-    .collection("users")
+    .collection(COLECCTION)
     .updateOne(query, newValues);
   return result;
 }
