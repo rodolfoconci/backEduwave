@@ -12,6 +12,46 @@ export async function getPublicaciones() {
   return publicaciones;
 }
 
+export async function validarPublicacion(id) {
+  const clientmongo = await getConnection();
+  const query = { _id: new ObjectId(id) };
+  const newValues = {
+    $set: {
+      validate: true
+    },
+    $unset: {
+      edited: "",
+      rejected: ""
+    }
+  };
+
+  const result = await clientmongo
+    .db("eduwave")
+    .collection("publicaciones")
+    .updateOne(query, newValues);
+  return result;
+}
+
+export async function rechazarPublicacion(id) {
+  const clientmongo = await getConnection();
+  const query = { _id: new ObjectId(id) };
+  const newValues = {
+    $set: {
+      rejected: true
+    },
+    $unset: {
+      edited: "",
+      validate: ""
+    }
+  };
+
+  const result = await clientmongo
+    .db("eduwave")
+    .collection("publicaciones")
+    .updateOne(query, newValues);
+  return result;
+}
+
 export async function getPublicacionByMateria(materia){
   const connectiondb = await getConnection();
   const publicaciones = await connectiondb
@@ -27,27 +67,26 @@ export async function getPublicacionesValidas(pageSize, page, materia) {
 
   const skip = (page - 1) * pageSize;
 
-  // Construye el pipeline de agregación dinámicamente
   const pipeline = [
     {
       $match: { validate: true }
     },
     {
       $lookup: {
-        from: "users", // La colección de usuarios
-        localField: "user_id", // Campo en publicaciones
-        foreignField: "_id", // Campo en usuarios
-        as: "user_info" // Nombre del campo para la información combinada
+        from: "users",
+        localField: "user_id",
+        foreignField: "_id",
+        as: "user_info"
       }
     },
     {
-      $unwind: "$user_info" // Desenrolla el array resultante de la combinación
+      $unwind: "$user_info"
     },
     {
       $project: {
         _id: 1,
         description: 1,
-        username: "$user_info.username", // Cambia según el nombre del campo en tu colección de usuarios
+        username: "$user_info.username",
         materias: 1,
         precio: 1,
         telefono: 1,
@@ -61,7 +100,6 @@ export async function getPublicacionesValidas(pageSize, page, materia) {
     }
   ];
 
-  // Agrega una etapa de $match adicional si se proporciona una materia
   if (materia) {
     pipeline.unshift({
       $match: { materias: materia }
@@ -89,15 +127,58 @@ export async function getPublicacionesValidas(pageSize, page, materia) {
 }
 
 
-export async function getPublicacionesNoValidas() {
+export async function getPublicacionesNoValidas(pageSize, page) {
   const clientmongo = await getConnection();
 
+  const skip = (page - 1) * pageSize;
+
+  const pipeline = [
+    {
+      $match: { validate: false }
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "user_id",
+        foreignField: "_id",
+        as: "user_info"
+      }
+    },
+    {
+      $unwind: "$user_info"
+    },
+    {
+      $project: {
+        _id: 1,
+        description: 1,
+        username: "$user_info.username",
+        materias: 1,
+        precio: 1,
+        telefono: 1,
+      }
+    },
+    {
+      $skip: skip
+    },
+    {
+      $limit: pageSize
+    }
+  ];
   const publicaciones = await clientmongo
-    .db()
+    .db("eduwave")
     .collection("publicaciones")
-    .find({ validado: false })
+    .aggregate(pipeline)
     .toArray();
-  return publicaciones;
+
+  const totalMatch = { validate: false };
+
+
+  const total = await clientmongo
+    .db("eduwave")
+    .collection("publicaciones")
+    .countDocuments(totalMatch);
+
+  return { publicaciones, total };
 }
 
 export async function getPublicacionesByUserId(user_id) {
