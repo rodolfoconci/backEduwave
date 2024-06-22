@@ -88,7 +88,7 @@ router.get("/byUser/:user_id", async (req, res) => {
   }
 });
 
-router.delete("/:id/delete", auth, async (req, res) => {
+router.delete("/delete/:id", auth, async (req, res) => {
   const publicacion = await deletePublicacion(req.params.id);
   res.json(publicacion);
 });
