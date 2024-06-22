@@ -223,9 +223,12 @@ export async function updatePublicacion(publicacion) {
       materias: publicacion.materias,
       precio: publicacion.precio,
       telefono: publicacion.telefono,
-      validate: false,
       edited: true
     },
+    $unset: {
+      validate: "",
+      rejected: ""
+    }
   };
 
   const result = await clientmongo
