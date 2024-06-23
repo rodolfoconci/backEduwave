@@ -43,7 +43,7 @@ router.get("/byMateria", auth, async (req, res) => {
 
 
 
-router.get("/noValidas", async (req, res) => {
+router.get("/noValidas", auth, async (req, res) => {
   try {
     const pageSize = req.query.pageSize ? parseInt(req.query.pageSize) : 10;
     const page = req.query.page ? parseInt(req.query.page) : 1;
@@ -73,9 +73,8 @@ router.put("/rechazar/:id", auth, async (req, res) => {
 router.get("/byUser/:user_id", async (req, res) => {
   const userId = req.params.user_id;
   try {
-    const publicaciones = await getPublicacionByUserId(userId);
-    res.json(publicaciones);
-    
+    const publicacion = await getPublicacionByUserId(userId);
+    res.json(publicacion);
   } catch (error) {
     res.status(500).send(error.message);
   }
