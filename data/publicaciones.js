@@ -196,6 +196,65 @@ export async function getPublicacionesNoValidas(pageSize, page) {
   return { publicaciones, total };
 }
 
+export async function getPublicacionesRechazadas(pageSize, page) {
+  const clientmongo = await getConnection();
+
+  const skip = (page - 1) * pageSize;
+
+  const pipeline = [
+    {
+      $match: {
+        rejected: true 
+      }
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "user_id",
+        foreignField: "_id",
+        as: "user_info"
+      }
+    },
+    {
+      $unwind: "$user_info"
+    },
+    {
+      $project: {
+        _id: 1,
+        description: 1,
+        username: "$user_info.username",
+        materias: 1,
+        precio: 1,
+        telefono: 1,
+        reason: 1
+      }
+    },
+    {
+      $skip: skip
+    },
+    {
+      $limit: pageSize
+    }
+  ];
+
+  const publicaciones = await clientmongo
+    .db(DATABASE)
+    .collection(COLLECTION)
+    .aggregate(pipeline)
+    .toArray();
+
+  const totalMatch = {
+      rejected: true
+  };
+
+  const total = await clientmongo
+    .db(DATABASE)
+    .collection(COLLECTION)
+    .countDocuments(totalMatch);
+
+  return { publicaciones, total };
+}
+
 export async function getPublicacionByUserId(user_id) {
   const clientmongo = await getConnection();
 
@@ -227,6 +286,24 @@ export async function addPublicacion(publicacion) {
     .insertOne(publicacion);
 
   return result;
+}
+
+export async function obtenerEstadistica(){
+  const clientmongo = await getConnection();
+  const db = clientmongo.db(DATABASE);
+  const collection = db.collection(COLLECTION);
+
+  const validadas = await collection.countDocuments({ validate: true });
+  const rechazadas = await collection.countDocuments({ rejected: true });
+  const noValidadas = await collection.countDocuments({ validate: false }) + await collection.countDocuments({ edited: true });
+  const total = await collection.countDocuments();
+
+  return {
+    validadas:validadas,
+    rechazadas:rechazadas,
+    noValidadas:noValidadas,
+    total:total
+  };
 }
 
 export async function updatePublicacion(publicacion) {

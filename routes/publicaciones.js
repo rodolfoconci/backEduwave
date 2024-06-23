@@ -1,6 +1,5 @@
 import express from "express";
 import {
-  getPublicaciones,
   getPublicacion,
   addPublicacion,
   deletePublicacion,
@@ -10,12 +9,23 @@ import {
   getPublicacionByMateria,
   getPublicacionByUserId,
   validarPublicacion,
-  rechazarPublicacion
+  rechazarPublicacion,
+  obtenerEstadistica, 
+  getPublicacionesRechazadas
 } from "../data/publicaciones.js";
 import auth from "../middleware/auth.js";
 
 
 const router = express.Router();
+
+router.get("/estadistica", auth, async (req, res) => {
+  try {
+    const estadisticas = await obtenerEstadistica();
+    res.json(estadisticas);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener las estadísticas de publicaciones' });
+  }
+});
 
 router.get("/validas", async (req, res) => {
   try {
@@ -48,6 +58,17 @@ router.get("/noValidas", auth, async (req, res) => {
     const pageSize = req.query.pageSize ? parseInt(req.query.pageSize) : 10;
     const page = req.query.page ? parseInt(req.query.page) : 1;
     const { publicaciones, total } = await getPublicacionesNoValidas(pageSize, page);
+    res.json({ publicaciones, total });
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
+
+router.get("/rechazadas", auth, async (req, res) => {
+  try {
+    const pageSize = req.query.pageSize ? parseInt(req.query.pageSize) : 10;
+    const page = req.query.page ? parseInt(req.query.page) : 1;
+    const { publicaciones, total } = await getPublicacionesRechazadas(pageSize, page);
     res.json({ publicaciones, total });
   } catch (error) {
     res.status(500).send(error.message);
