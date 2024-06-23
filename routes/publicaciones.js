@@ -65,7 +65,8 @@ router.put("/validar/:id", auth, async (req, res) => {
 });
 
 router.put("/rechazar/:id", auth, async (req, res) => {
-  const publicacion = await rechazarPublicacion(req.params.id);
+  const { reason } = req.body;
+  const publicacion = await rechazarPublicacion(req.params.id, reason);
   res.json(publicacion);
 });
 
@@ -86,8 +87,26 @@ router.delete("/delete/:id", auth, async (req, res) => {
 });
 
 router.put("/update/:id", auth, async (req, res) => {
-  const publicacion = await updatePublicacion(req.body);
-  res.json(publicacion);
+  
+  const { telefono, precio, description, materias } = req.body;
+  if (!telefono || !precio || !description || !materias || !Array.isArray(materias) || materias.length === 0) {
+      return res.status(400).json({ error: "El cuerpo de la solicitud debe incluir telefono, precio, descripcion y al menos una materia" });
+  }
+  
+  if (isNaN(Number(precio))) {
+      return res.status(400).json({ error: "El campo 'precio' debe ser numérico." });
+  }
+  
+  if (description.trim() === "") {
+      return res.status(400).json({ error: "El campo 'description' no puede estar vacío." });
+  }
+  
+  try {
+      const publicacion = await updatePublicacion(req.body);
+      res.status(200).json({ status: "success", publicacion });
+  } catch (error) {
+      res.status(500).json({ error: "Hubo un error al actualizar la publicación. Inténtelo de nuevo más tarde." });
+  }
 });
 
 export default router;

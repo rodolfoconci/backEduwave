@@ -24,7 +24,8 @@ export async function validarPublicacion(id) {
     },
     $unset: {
       edited: "",
-      rejected: ""
+      rejected: "",
+      reason: ""
     }
   };
 
@@ -35,12 +36,13 @@ export async function validarPublicacion(id) {
   return result;
 }
 
-export async function rechazarPublicacion(id) {
+export async function rechazarPublicacion(id, reason) {
   const clientmongo = await getConnection();
   const query = { _id: new ObjectId(id) };
   const newValues = {
     $set: {
-      rejected: true
+      rejected: true,
+      reason: reason
     },
     $unset: {
       edited: "",
@@ -240,7 +242,8 @@ export async function updatePublicacion(publicacion) {
     },
     $unset: {
       validate: "",
-      rejected: ""
+      rejected: "",
+      reason: ""
     }
   };
 
