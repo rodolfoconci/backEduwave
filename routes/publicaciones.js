@@ -45,11 +45,11 @@ router.post("/publicar", auth, async (req, res) => {
   res.json(result);
 });
 
-router.get("/byMateria", auth, async (req, res) => {
+/* router.get("/byMateria", auth, async (req, res) => {
   const materia = req.query.materia;
   const publicaciones = await getPublicacionByMateria(materia);
   res.json(publicaciones);
-});
+}); */
 
 
 
@@ -75,10 +75,10 @@ router.get("/rechazadas", auth, async (req, res) => {
   }
 });
 
-router.get("/:id", auth, async (req, res) => {
+/* router.get("/:id", auth, async (req, res) => {
   const publicacion = await getPublicacion(req.params.id);
   res.json(publicacion);
-});
+}); */
 
 router.put("/validar/:id", auth, async (req, res) => {
   const publicacion = await validarPublicacion(req.params.id);
@@ -92,7 +92,7 @@ router.put("/rechazar/:id", auth, async (req, res) => {
 });
 
 
-router.get("/byUser/:user_id", async (req, res) => {
+router.get("/byUser/:user_id", auth, async (req, res) => {
   const userId = req.params.user_id;
   try {
     const publicacion = await getPublicacionByUserId(userId);
